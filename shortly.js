@@ -70,6 +70,65 @@ app.post('/links', function(req, res) {
 // Write your authentication routes here
 /************************************************************/
 
+app.get('/login', function(req, res) {
+  res.render('login');
+});
+app.get('/signup', function(req, res) {
+  res.render('signup');
+});
+
+
+// app.get('/login', function(req, res) {
+//    res.send('<form method="post" action="/login">' +
+//   '<p>' +
+//     '<label>Username:</label>' +
+//     '<input type="text" name="username">' +
+//   '</p>' +
+//   '<p>' +
+//     '<label>Password:</label>' +
+//     '<input type="text" name="password">' +
+//   '</p>' +
+//   '<p>' +
+//     '<input type="submit" name="Login" value="Login">' +
+//   '</p>' +
+//   '<p>' +
+//     '<input type="submit" name="Signup" value="Signup">' +
+//   '</p>'  +
+//   '</form>');
+// });
+
+app.post('/login', function(req, res) {
+
+    var username = req.body.username;
+    var password = req.body.password;
+
+    console.log(username);
+    console.log(password);
+    console.log(req.body);
+
+    if (req.body.Signup === 'Signup') {
+      // create user
+      // redirect to main page
+
+    } else if (req.body.Login === 'Login') {
+      // check username and password combination
+      // redirect to main page
+
+
+    }
+    res.redirect('/');
+
+    // if(username === 'demo' && password === 'demo'){
+    //     request.session.regenerate(function(){
+    //     request.session.user = username;
+    //     response.redirect('/restricted');
+    //     });
+    // }
+    // else {
+    //    res.redirect('/');
+    // }
+
+});
 
 
 /************************************************************/
