@@ -4,6 +4,7 @@
     <li><a href='#' class='index'>All Links</a></li>
     <li><a href='#' class='create'>Shorten</a></li>
   </ul>
+    <button id='logout'>logout</button>
   </div>
   <div id='container'></div>
 </script>
@@ -32,6 +33,14 @@
 <script>
   $(function(){
     new Shortly();
+
+    // $('#logout').on('click', function() {
+    //   app.get('/logout', function(req, res){
+    //       req.session.destroy(function(){
+    //         res.redirect('/login');
+    //       });
+    //   });
+    // });
   });
 
   window.Templates = {};

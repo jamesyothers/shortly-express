@@ -9,7 +9,7 @@ var Links = require('./app/collections/links');
 var Link = require('./app/models/link');
 var Click = require('./app/models/click');
 
-var bcrypt = require('bcrypt-nodejs');
+// var bcrypt = require('bcrypt-nodejs');
 
 var app = express();
 
@@ -19,23 +19,26 @@ app.configure(function() {
   app.use(partials());
   app.use(express.bodyParser())
   app.use(express.static(__dirname + '/public'));
+  app.use(express.cookieParser());
+  app.use(express.session({secret: 'topsecretlol'}));
 });
 
 app.get('/', function(req, res) {
-
-  res.render('index');
-  // util.checkUser(req, res, function(found) {
-  //   if (found) {
-  //     res.render('index');
-  //   } else {
-  //     res.redirect('/signup');
-  //   }
-  // });
-  // res.redirect('/login');
+  console.log(req.session.user);
+  if (req.session.user) {
+    res.render('index');
+  } else {
+    res.redirect('/login');
+  }
 });
 
 app.get('/create', function(req, res) {
-  res.render('index');
+  console.log(req.session.user);
+  if (req.session.user) {
+    res.render('index');
+  } else {
+    res.redirect('/login');
+  }
 });
 
 app.get('/links', function(req, res) {
@@ -82,13 +85,20 @@ app.post('/links', function(req, res) {
 /************************************************************/
 
 app.get('/login', function(req, res) {
+  // todo: check is session open
+  // if open then redirect to home
+
   res.render('login');
 });
 
 app.post('/login', function(req, res) {
+
   util.checkUser(req, res, function(found) {
     if (found) {
-      res.redirect('/');
+      req.session.regenerate(function() {
+        req.session.user = req.body.username;
+        res.redirect('/');
+      });
     } else {
       res.redirect('/signup');
     }
@@ -96,13 +106,20 @@ app.post('/login', function(req, res) {
 });
 
 app.get('/signup', function(req, res) {
+  // todo: check is session open
+  // if open then redirect to home
+
   res.render('signup');
 });
 
 app.post('/signup', function(req, res) {
+
   util.checkUser(req, res, function(found) {
     if (found) {
-      res.redirect('/');
+      // req.session.regenerate(function() {
+        // req.session.user = req.body.username;
+      res.redirect('/login');
+      // });
     } else {
       // if not create new user
       var user = new User({
@@ -112,7 +129,12 @@ app.post('/signup', function(req, res) {
 
       user.save().then(function(newUser) {
         Users.add(newUser);   // add to Users collection
-        res.redirect('/');
+        req.session.regenerate(function() {
+          req.session.user = req.body.username;
+          res.redirect('/');
+        });
+
+        // res.redirect('/');
       });
     }
   });
