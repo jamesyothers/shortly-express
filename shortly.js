@@ -9,8 +9,6 @@ var Links = require('./app/collections/links');
 var Link = require('./app/models/link');
 var Click = require('./app/models/click');
 
-// var bcrypt = require('bcrypt-nodejs');
-
 var app = express();
 
 app.configure(function() {
@@ -49,7 +47,6 @@ app.get('/links', function(req, res) {
 
 app.post('/links', function(req, res) {
   var uri = req.body.url;
-
   if (!util.isValidUrl(uri)) {
     console.log('Not a valid url: ', uri);
     return res.send(404);
@@ -64,13 +61,11 @@ app.post('/links', function(req, res) {
           console.log('Error reading URL heading: ', err);
           return res.send(404);
         }
-
         var link = new Link({
           url: uri,
           title: title,
           base_url: req.headers.origin
         });
-
         link.save().then(function(newLink) {
           Links.add(newLink);
           res.send(200, newLink);
@@ -126,7 +121,6 @@ app.post('/signup', function(req, res) {
         username: req.body.username,
         password: req.body.password,
       });
-
       user.save().then(function(newUser) {
         Users.add(newUser);   // add to Users collection
         req.session.regenerate(function() {
@@ -140,7 +134,11 @@ app.post('/signup', function(req, res) {
   });
 });
 
-
+app.get('/logout', function(req, res) {
+  req.session.destroy(function(){
+    res.redirect('/login');
+  });
+});
 /************************************************************/
 // Handle the wildcard route last - if all other routes fail
 // assume the route is a short code and try and handle it here.

@@ -9,20 +9,11 @@ var User = db.Model.extend({
   password: '',
   initialize: function(){
     this.on('creating', function(model, attrs, options){
-      // console.log('username: ' + model.get('username'));
-      // console.log('password: ' + model.get('password'));
-
-
       model.set('username', model.get('username'));
-
       var hash = bcrypt.hashSync(model.get('password'));
-      // console.log(hash);
       model.set('password', hash);
     });
   }
-
-
-
 });
 
 module.exports = User;
