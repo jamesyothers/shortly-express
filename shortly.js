@@ -98,9 +98,13 @@ app.post('/links', function(req, res) {
 /************************************************************/
 
 app.get('/login', function(req, res) {
-  // todo: check is session open
+  // check is session open
   // if open then redirect to home
-  res.render('login');
+  if (req.session.user) {
+    res.redirect('/');
+  } else {
+    res.render('login');
+  }
 });
 
 app.post('/login', function(req, res) {
@@ -121,10 +125,13 @@ app.post('/login', function(req, res) {
 });
 
 app.get('/signup', function(req, res) {
-  // todo: check is session open
+  // check is session open
   // if open then redirect to home
-
-  res.render('signup');
+  if (req.session.user) {
+    res.redirect('/');
+  } else {
+    res.render('signup');
+  }
 });
 
 app.post('/signup', function(req, res) {
