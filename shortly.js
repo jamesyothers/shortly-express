@@ -9,6 +9,8 @@ var Links = require('./app/collections/links');
 var Link = require('./app/models/link');
 var Click = require('./app/models/click');
 
+var bcrypt = require('bcrypt-nodejs');
+
 var app = express();
 
 app.configure(function() {
@@ -79,67 +81,46 @@ app.get('/signup', function(req, res) {
 
 app.post('/login', function(req, res) {
 
-    var username = req.body.username;
-    var password = req.body.password;
+  console.log('inside /login post');
+  // use bcrypt to hash the password
+  // var hash = bcrypt.hashSync(req.body.password);
+  // console.log(hash);
+  new User({username: req.body.username}).fetch().then(function(user) {
+    // console.log('found: ', found);
+    // compare password from user to password in database
+    var found = bcrypt.compareSync(req.body.password, user.attributes.password);
+    if (found) {
 
-    console.log(username);
-    console.log(password);
-    console.log(req.body);
+      res.redirect('/');
+    } else {
+      res.redirect('/signup');
+    }
+  });
 
-    res.redirect('/');
 });
 
 
 app.post('/signup', function(req, res) {
 
+  // check if user exists
   new User({username: req.body.username, password: req.body.password}).fetch().then(function(found) {
-    console.log('found: ', found);
+    // console.log('found: ', found);
     if (found) {
-      res.send(200, found.attributes);
-      // res.redirect('/');
+      res.redirect('/');
     } else {
-
+      // if not create new user
       var user = new User({
         username: req.body.username,
         password: req.body.password,
       });
 
       user.save().then(function(newUser) {
-        Users.add(newUser);
-        res.send(200, newUser);
-        // res.redirect('/');
+        Users.add(newUser);   // add to Users collection
+        res.redirect('/');
       });
 
     }
   });
-  // if (found) {
-  //   res.send(200, found.attributes);
-  // } else {
-  //   util.getUrlTitle(uri, function(err, title) {
-  //     if (err) {
-  //       console.log('Error reading URL heading: ', err);
-  //       return res.send(404);
-  //     }
-
-  //     var link = new Link({
-  //       url: uri,
-  //       title: title,
-  //       base_url: req.headers.origin
-  //     });
-
-  //     link.save().then(function(newLink) {
-  //       Links.add(newLink);
-  //       res.send(200, newLink);
-  //     });
-  //   });
-  // }
-
-
-  // console.log(username);
-  // console.log(password);
-  // console.log(req.body);
-
-
 });
 
 
