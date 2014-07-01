@@ -22,7 +22,16 @@ app.configure(function() {
 });
 
 app.get('/', function(req, res) {
+
   res.render('index');
+  // util.checkUser(req, res, function(found) {
+  //   if (found) {
+  //     res.render('index');
+  //   } else {
+  //     res.redirect('/signup');
+  //   }
+  // });
+  // res.redirect('/login');
 });
 
 app.get('/create', function(req, res) {
@@ -75,36 +84,23 @@ app.post('/links', function(req, res) {
 app.get('/login', function(req, res) {
   res.render('login');
 });
-app.get('/signup', function(req, res) {
-  res.render('signup');
-});
 
 app.post('/login', function(req, res) {
-
-  console.log('inside /login post');
-  // use bcrypt to hash the password
-  // var hash = bcrypt.hashSync(req.body.password);
-  // console.log(hash);
-  new User({username: req.body.username}).fetch().then(function(user) {
-    // console.log('found: ', found);
-    // compare password from user to password in database
-    var found = bcrypt.compareSync(req.body.password, user.attributes.password);
+  util.checkUser(req, res, function(found) {
     if (found) {
-
       res.redirect('/');
     } else {
       res.redirect('/signup');
     }
   });
-
 });
 
+app.get('/signup', function(req, res) {
+  res.render('signup');
+});
 
 app.post('/signup', function(req, res) {
-
-  // check if user exists
-  new User({username: req.body.username, password: req.body.password}).fetch().then(function(found) {
-    // console.log('found: ', found);
+  util.checkUser(req, res, function(found) {
     if (found) {
       res.redirect('/');
     } else {
@@ -118,7 +114,6 @@ app.post('/signup', function(req, res) {
         Users.add(newUser);   // add to Users collection
         res.redirect('/');
       });
-
     }
   });
 });
