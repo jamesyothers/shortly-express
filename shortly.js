@@ -9,29 +9,39 @@ var Links = require('./app/collections/links');
 var Link = require('./app/models/link');
 var Click = require('./app/models/click');
 
+// create server
 var app = express();
 
 app.configure(function() {
   app.set('views', __dirname + '/views');
+  // ejs: embedded javascript templating engine
+  // ejs is a server side templating engine
   app.set('view engine', 'ejs');
   app.use(partials());
-  app.use(express.bodyParser())
+  app.use(express.bodyParser());
   app.use(express.static(__dirname + '/public'));
+  // add session and cookieparser to track user's login status
   app.use(express.cookieParser());
   app.use(express.session({secret: 'topsecretlol'}));
 });
 
+
+// handle server requests
+
 app.get('/', function(req, res) {
-  console.log(req.session.user);
+  // if session is active
   if (req.session.user) {
+    // render with ejs template on server
+    // send .ejs file to client
+    // on client side, using handlebars template to populate ejs template
     res.render('index');
   } else {
+    // otherwise send to login page
     res.redirect('/login');
   }
 });
 
 app.get('/create', function(req, res) {
-  console.log(req.session.user);
   if (req.session.user) {
     res.render('index');
   } else {
@@ -45,6 +55,8 @@ app.get('/links', function(req, res) {
   });
 });
 
+
+// main user page on login
 app.post('/links', function(req, res) {
   var uri = req.body.url;
   if (!util.isValidUrl(uri)) {
@@ -52,6 +64,9 @@ app.post('/links', function(req, res) {
     return res.send(404);
   }
 
+  // creating a skeleton for the search
+  // the model is attached to the database
+  // get from the Link table the url property at the requested url (uri)
   new Link({ url: uri }).fetch().then(function(found) {
     if (found) {
       res.send(200, found.attributes);
@@ -61,11 +76,14 @@ app.post('/links', function(req, res) {
           console.log('Error reading URL heading: ', err);
           return res.send(404);
         }
+        // if link not in the link table
+        // create new link
         var link = new Link({
           url: uri,
           title: title,
           base_url: req.headers.origin
         });
+        // save new link to database
         link.save().then(function(newLink) {
           Links.add(newLink);
           res.send(200, newLink);
@@ -82,16 +100,18 @@ app.post('/links', function(req, res) {
 app.get('/login', function(req, res) {
   // todo: check is session open
   // if open then redirect to home
-
   res.render('login');
 });
 
 app.post('/login', function(req, res) {
-
+  // utilize checkUser helper in lib/utility
   util.checkUser(req, res, function(found) {
+    // if user found in database and password matches
     if (found) {
+      // generate a session on login
       req.session.regenerate(function() {
         req.session.user = req.body.username;
+        // redirect to main user page for app
         res.redirect('/');
       });
     } else {
@@ -111,10 +131,7 @@ app.post('/signup', function(req, res) {
 
   util.checkUser(req, res, function(found) {
     if (found) {
-      // req.session.regenerate(function() {
-        // req.session.user = req.body.username;
       res.redirect('/login');
-      // });
     } else {
       // if not create new user
       var user = new User({
@@ -127,13 +144,13 @@ app.post('/signup', function(req, res) {
           req.session.user = req.body.username;
           res.redirect('/');
         });
-
-        // res.redirect('/');
       });
     }
   });
 });
 
+// if user clicks logout button destroy session and redirect to login
+// check index.html for how this works
 app.get('/logout', function(req, res) {
   req.session.destroy(function(){
     res.redirect('/login');
@@ -145,6 +162,7 @@ app.get('/logout', function(req, res) {
 // If the short-code doesn't exist, send the user to '/'
 /************************************************************/
 
+// for all other routes
 app.get('/*', function(req, res) {
   new Link({ code: req.params[0] }).fetch().then(function(link) {
     if (!link) {
@@ -168,4 +186,5 @@ app.get('/*', function(req, res) {
 });
 
 console.log('Shortly is listening on 4568');
+// express' way of implementing server
 app.listen(4568);
