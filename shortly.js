@@ -30,7 +30,7 @@ app.get('/create', function(req, res) {
 app.get('/links', function(req, res) {
   Links.reset().fetch().then(function(links) {
     res.send(200, links.models);
-  })
+  });
 });
 
 app.post('/links', function(req, res) {
@@ -77,8 +77,6 @@ app.get('/signup', function(req, res) {
   res.render('signup');
 });
 
-
-
 app.post('/login', function(req, res) {
 
     var username = req.body.username;
@@ -92,17 +90,56 @@ app.post('/login', function(req, res) {
 });
 
 
-
 app.post('/signup', function(req, res) {
 
-    var username = req.body.username;
-    var password = req.body.password;
+  new User({username: req.body.username, password: req.body.password}).fetch().then(function(found) {
+    console.log('found: ', found);
+    if (found) {
+      res.send(200, found.attributes);
+      // res.redirect('/');
+    } else {
 
-    console.log(username);
-    console.log(password);
-    console.log(req.body);
+      var user = new User({
+        username: req.body.username,
+        password: req.body.password,
+      });
 
-    res.redirect('/');
+      user.save().then(function(newUser) {
+        Users.add(newUser);
+        res.send(200, newUser);
+        // res.redirect('/');
+      });
+
+    }
+  });
+  // if (found) {
+  //   res.send(200, found.attributes);
+  // } else {
+  //   util.getUrlTitle(uri, function(err, title) {
+  //     if (err) {
+  //       console.log('Error reading URL heading: ', err);
+  //       return res.send(404);
+  //     }
+
+  //     var link = new Link({
+  //       url: uri,
+  //       title: title,
+  //       base_url: req.headers.origin
+  //     });
+
+  //     link.save().then(function(newLink) {
+  //       Links.add(newLink);
+  //       res.send(200, newLink);
+  //     });
+  //   });
+  // }
+
+
+  // console.log(username);
+  // console.log(password);
+  // console.log(req.body);
+
+
 });
 
 
